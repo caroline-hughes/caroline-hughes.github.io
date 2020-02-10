@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Untitled Document</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <link rel="stylesheet" type="text/css" href="waveform.css">
+</head>
+
+<body>
+    
+    <h1>Web Synth</h1>
+    
+    <div
+    <p> Choose Your Waveform 
+        <select id="waveFormSelector" onchange="selectWaveType();">
+            <option>sawtooth</option>
+            <option>triangle</option>
+            <option>square</option>
+    </select></p>
+        
+    <p> Ordered or Random? 
+        <select id="randomSelector" onchange="selectIfRandom();"> 
+            <option>ordered</option>
+            <option>random</option>
+        </select></p>  
+    
+   
+    <label>Tonic:</label>
+        <input type="range" id="tonic" value="220" min="100" max="400" 
+            oninput="document.getElementById('theTonic').innerHTML = this.value" class="slider" onchange="sliderChange();"/>
+
+        <label id="theTonic"></label>
+
+    <br>
+    <br>
+    
+    <button onclick="playNotesFreq1();">Play</button>
+    
+    
+    <br>
+    <br>
+    
+
+    </div>
+
+</body>
+    <script src="waveform.js"></script>
+</html>
