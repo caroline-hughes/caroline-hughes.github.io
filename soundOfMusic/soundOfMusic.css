@@ -1,0 +1,54 @@
+
+h1{
+    color: slateblue;
+}
+
+audio {
+    display:none;
+    }
+
+
+.container{
+    text-align:center;
+    border: none;
+}
+
+img{
+    display:inline-block;
+    margin:5px 20px;
+    padding:5px;
+    
+    border:1px solid #CCC;
+}
+
+div {
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+} 
+
+h1 {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+}
+
+img {
+    border-style: solid;
+    border-color: white;
+    border-width: 12px;
+    align-content: center;
+    margin: 0 auto;
+} 
+
+img:hover{
+    background-color: black
+}
+
+img:active{
+    background-color: slateblue
+}
+
+
