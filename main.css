@@ -1,31 +1,61 @@
 body {
-  font-family: "Arial";
+    min-width: 1000px;  
+    padding-bottom: 60px;
+    font-family: "Arial";
     background-color: slategray;
-    margin:0;
+    margin: 0;
+    padding: 50px;
+
 }
-.top {
-    min-width: 1000px;    
+.start {
+    padding-top: 100px;
+}
+.graphs {
+    margin: auto;
+}
+a {
+    text-decoration: none;
 }
 p {
-    font-size: 20px;
+    font-size: 18px;
     color: white;
     float: left;
+    margin: 0;
+    padding: 10px;
+}
+.row {
+    display:inline-block;
+}
+.pivot {
+    display: inline-block;
+}
+.end {
+    padding-bottom: 100px;
+}
+.last {
+    padding-top: 400px;
 }
 h1 {
     margin: 0;
-    font-size: 60px;
+    font-size: 50px;
     text-align: center;
     color: white;
 }
-
-h2{
+.bottom {
+    border: 1px solid white;
+}
+h2 {
     font-style: italic;
     text-align: center;
     color: white;
     font-size: 20px;
+    margin-bottom: 5px;
 }
-.rest {
-    padding: 80px;
+h4 {
+    text-align: center;
+    color: white;
+    font-size: 15px;
+    margin: 0;
 }
 #link {
     color: darkblue;
@@ -33,33 +63,18 @@ h2{
 .cite {
     color: darkblue;
 }
-.graphs {
-    padding: auto;
-}
-/*
+ul {
+    float: left;
+    list-style-type: none;
 }
 h3 {
+    float: left;
     color: white;
-    font-size: 20px;
+    font-size: 40px;
+    margin: 0;
+    padding-left: 10px;
+    padding-top: 30px;
 }
-*/
-/*
-.top{
-    border-bottom: solid;
-    border-bottom-color: white;
-}
-*/
-a {
-  text-decoration: none;
-}
-/*
-
-h4{
-    font-style: italic;
-    color: white;
-    font-size: 20px;
-}
-*/
 
 img {
     max-width: 100%;
