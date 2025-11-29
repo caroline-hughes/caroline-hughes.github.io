@@ -7,7 +7,8 @@
 		<style>
 			body {
 				margin: 0;
-				font-family: "Inter", sans-serif;
+				font-family: "Inter", -apple-system, BlinkMacSystemFont,
+					sans-serif;
 				color: #222;
 				background: #fff;
 				padding: 60px 20px;
@@ -20,22 +21,46 @@
 					opacity: 1;
 				}
 			}
+
+			img.profile {
+				width: 180px;
+				height: 180px;
+				border-radius: 50%;
+				object-fit: cover;
+				box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+				margin-bottom: 24px;
+			}
+
 			h1 {
 				margin-bottom: 0;
 				font-size: 2.8rem;
+				font-weight: 600;
 			}
 			p.subtitle {
 				color: #666;
 				margin-top: 0.2rem;
+				font-size: 1.1rem;
 			}
+
 			a {
 				color: #2f6ad6;
 				text-decoration: none;
 				margin: 0 12px;
+				font-weight: 500;
+			}
+
+			.bio {
+				max-width: 600px;
+				margin: 2rem auto 0;
+				font-size: 1.05rem;
+				line-height: 1.65;
 			}
 		</style>
 	</head>
 	<body>
+		<!-- ⭐ Your centered profile image -->
+		<img src="gradpic_medium.jpg" alt="Caroline Hughes" class="profile" />
+
 		<h1>Caroline Hughes</h1>
 		<p class="subtitle">
 			Software Engineer • ML for Equity • Systems & Infrastructure
@@ -44,14 +69,14 @@
 		<p>
 			<a href="https://github.com/caroline-hughes">GitHub</a> /
 			<a href="https://www.linkedin.com/in/carolinehughes">LinkedIn</a> /
-			<a href="mailto:caroline@hey.com">Email</a>
+			<a href="mailto:carolinehughes1717@gmail.com">Email</a>
 		</p>
 
-		<p style="max-width: 580px; margin: 2rem auto">
+		<p class="bio">
 			I build backend systems, data pipelines, and ML-driven tools that
 			help real people — from patient scheduling to housing access.
-			Currently engineering at Oracle Health & AI and exploring applied ML
-			research.
+			Currently an engineer at Oracle Health & AI, working at the
+			intersection of systems, data, and equitable design.
 		</p>
 	</body>
 </html>
