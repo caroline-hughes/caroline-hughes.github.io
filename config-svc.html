@@ -265,9 +265,12 @@
 				<p class="preserve-lines">
 					The Config Service was a foundational service I owned for about a year, while working within Oracle Health & AI (OHAI).
 
-					In a nutshell, it was a simple <code>(key, value, scope)</code> store, for configuration settings consumed by microservices in the cluster-- think timeout durations, feature flags, and other tunable parameters.
+					In a nutshell, it was a simple <code>(key, value, scope)</code> store, housing the 'configurations' or 'settings' of all microservices in the cluster. Think feature flags, and other tunable parameters.
+					For instance, the key <code>example.registration.addressFormat</code> might have one value for US region tenants, and another for EU tenants. Or, United Healthcare might want all it's tenants to have <code>example.featureflags.flagX</code> enabled, while other orgs don't use that feature at all.
 
-					We decided to migrate most of our configs out of helm and into to a new system, for a few reasons:
+					With many microservices, many environments, and the need to configure at the org/tenant/region level, the dimension space of our configs was exploding - we needed a better way to manage them than helm charts and environment variables.
+
+					We built this Configuration Service to migrate away from helm, for these key reasons:
 					1. Configs varied by region / country / tenant / org
 					- with helm, tiered settings creates a messy matrix: <code>service × environment × region × tenant × override</code>. our service collapsed that matrix (and the need to manage many helm charts) into a single source of truth, with ordered scopes and overrides
 
@@ -278,9 +281,11 @@
 					- with the new service, configs are accessible by a library call only when needed (no need to load env vars), and can be cached
 					- with many complex setting types, we could enforce type-safety at the service layer, rather than relying on individual services to do so
 
-					As the lead of the service, I worked daily on improving/enhancing/extending the service itself, and as first point of contact for all microservice folks, who needed their configs migrated over, who used the API for config creation/management, and who needed a hand with debugging config-related issues.
-					
-					I also (had to :)) became a pro at rapidly triaging any deployment issues, because config availability and consistency were foundational to booting the cluster, and predictable runtime behavior.
+					As the lead of the service, I 
+					- worked daily to enhance/extend to the library methods and the API, 
+					- planned, documented and executed the plan to migrate the first batch of caller microservices over to the Config Service... ensuring thorough testing and a successful first deployment rollout,
+					- served as first point of contact for questions around our API for config creation/update, scoping questions, and configuration bugs 
+					- became a pro at coordinating/managing service availability and consistency.. as the service was critical to app startup and various pieces of runtime functionality.
 				</p>
 			</header>
 
