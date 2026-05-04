@@ -4,139 +4,977 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Caroline Hughes</title>
-		<style>
-			body {
-				margin: 0;
-				font-family: "Inter", -apple-system, BlinkMacSystemFont,
-					sans-serif;
-				color: #222;
-				background: #fff;
-				padding: 60px 20px;
-				text-align: center;
-				opacity: 0;
-				animation: fadein 1.2s ease forwards;
+
+		<script>
+			(() => {
+				try {
+					const theme =
+						localStorage.getItem("portfolio-theme") || "dark";
+					document.documentElement.dataset.theme = theme;
+					document.documentElement.style.colorScheme = theme;
+				} catch {
+					document.documentElement.dataset.theme = "dark";
+					document.documentElement.style.colorScheme = "dark";
+				}
+			})();
+		</script>
+
+		<script type="module">
+			import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+			import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
+			const DEFAULT_FILE = "resume.md";
+			const THEME_KEY = "portfolio-theme";
+			const FILE_TREE = [
+				{ type: "file", path: "resume.md", label: "resume.md" },
+				{
+					type: "folder",
+					label: "projects",
+					defaultOpen: true,
+					children: [
+						{
+							type: "folder",
+							label: "oracle",
+							children: [
+								{
+									type: "file",
+									path: "projects/oracle/overview.md",
+									label: "overview.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/configuration-service.md",
+									label: "configuration-service.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/rules-engine.md",
+									label: "rules-engine.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/registration-ai-mode.md",
+									label: "registration-ai-mode.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/control-plane.md",
+									label: "control-plane.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/dedupe-agent.md",
+									label: "dedupe-agent.md",
+								},
+							],
+						},
+						{
+							type: "folder",
+							label: "undergrad",
+							children: [
+								{
+									type: "file",
+									path: "projects/undergrad/README.md",
+									label: "README.md",
+								},
+							],
+						},
+						{
+							type: "folder",
+							label: "personal",
+							children: [
+								{
+									type: "file",
+									path: "projects/personal/flo.md",
+									label: "flo.md",
+								},
+								{
+									type: "file",
+									path: "projects/personal/crosswalk-detector.md",
+									label: "crosswalk-detector.md",
+								},
+								{
+									type: "file",
+									path: "projects/personal/crossword-collab.md",
+									label: "crossword-collab.md",
+								},
+								{
+									type: "file",
+									path: "projects/personal/MNH-data-pipeline.md",
+									label: "MNH-data-pipeline.md",
+								},
+							],
+						},
+					],
+				},
+			];
+
+			const previewRoot = () => document.getElementById("preview-pane");
+			const sourceRoot = () => document.getElementById("source-pane");
+
+			let currentFile = DEFAULT_FILE;
+
+			function getTheme() {
+				return localStorage.getItem(THEME_KEY) || "dark";
 			}
-			@keyframes fadein {
-				to {
-					opacity: 1;
+
+			function applyTheme(theme) {
+				document.documentElement.dataset.theme = theme;
+				document.documentElement.style.colorScheme = theme;
+				localStorage.setItem(THEME_KEY, theme);
+				const themeButton = document.getElementById("theme-toggle");
+				if (themeButton) {
+					const nextTheme = theme === "dark" ? "light" : "dark";
+					themeButton.textContent = theme === "dark" ? "🌙" : "☀️";
+					themeButton.setAttribute(
+						"aria-label",
+						`Switch to ${nextTheme} mode`,
+					);
+					themeButton.setAttribute(
+						"title",
+						`Switch to ${nextTheme} mode`,
+					);
 				}
 			}
 
-			img.profile {
-				width: 180px;
-				height: 180px;
-				border-radius: 50%;
-				object-fit: cover;
-				box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-				margin-bottom: 24px;
+			function mermaidConfig() {
+				const dark = document.documentElement.dataset.theme === "dark";
+				return {
+					startOnLoad: false,
+					theme: "base",
+					themeVariables: {
+						fontFamily:
+							"'SFMono-Regular', 'IBM Plex Mono', 'Cascadia Code', Consolas, monospace",
+						primaryTextColor: dark ? "#E5ECF5" : "#172033",
+						lineColor: dark ? "#7F8EA7" : "#78909C",
+						background: dark ? "#111827" : "#FFFFFF",
+						mainBkg: dark ? "#111827" : "#FFFFFF",
+						clusterBkg: dark ? "#0F172A" : "#F8FAFC",
+						clusterBorder: dark ? "#334155" : "#CBD5E1",
+					},
+					flowchart: {
+						curve: "natural",
+						htmlLabels: true,
+					},
+					sequence: {
+						actorMargin: 72,
+						boxMargin: 12,
+						mirrorActors: false,
+						showSequenceNumbers: false,
+					},
+				};
+			}
+
+			function getHashPath() {
+				const hash = window.location.hash.replace(/^#\/?/, "");
+				return hash || DEFAULT_FILE;
+			}
+
+			function setHashPath(path) {
+				window.location.hash = `#/${path}`;
+			}
+
+			function containsPath(node, path) {
+				if (node.type === "file") {
+					return node.path === path;
+				}
+				return node.children.some((child) => containsPath(child, path));
+			}
+
+			function fileName(path) {
+				return path.split("/").pop();
+			}
+
+			function escapeHtml(value) {
+				return value
+					.replaceAll("&", "&amp;")
+					.replaceAll("<", "&lt;")
+					.replaceAll(">", "&gt;");
+			}
+
+			function renderTree(nodes, currentPath) {
+				return nodes
+					.map((node) => {
+						if (node.type === "file") {
+							const activeClass =
+								node.path === currentPath
+									? " tree-file-active"
+									: "";
+							return `
+								<button
+									class="tree-file${activeClass}"
+									data-path="${node.path}"
+									type="button"
+								>
+									${node.label}
+								</button>
+							`;
+						}
+
+						return `
+							<details class="tree-folder" ${
+								node.defaultOpen ||
+								containsPath(node, currentPath)
+									? "open"
+									: ""
+							}>
+								<summary>${node.label}</summary>
+								<div class="tree-children">
+									${renderTree(node.children, currentPath)}
+								</div>
+							</details>
+						`;
+					})
+					.join("");
+			}
+
+			function wireTreeNavigation() {
+				document.querySelectorAll(".tree-file").forEach((button) => {
+					button.addEventListener("click", () => {
+						const path = button.dataset.path;
+						if (path) setHashPath(path);
+					});
+				});
+			}
+
+			function installMarkdownOptions() {
+				marked.setOptions({
+					gfm: true,
+					breaks: false,
+				});
+			}
+
+			async function renderPreview(markdown) {
+				const preview = previewRoot();
+				if (!preview) return;
+
+				if (!markdown.trim()) {
+					preview.innerHTML = "";
+					return;
+				}
+
+				preview.innerHTML = marked.parse(markdown);
+
+				preview.querySelectorAll("a").forEach((link) => {
+					link.target = "_blank";
+					link.rel = "noreferrer";
+				});
+
+				preview
+					.querySelectorAll("pre > code.language-mermaid")
+					.forEach((code) => {
+						const pre = code.parentElement;
+						if (!pre) return;
+						const mermaidBlock = document.createElement("pre");
+						mermaidBlock.className = "mermaid";
+						mermaidBlock.textContent = code.textContent || "";
+						pre.replaceWith(mermaidBlock);
+					});
+
+				mermaid.initialize(mermaidConfig());
+				await mermaid.run({
+					nodes: preview.querySelectorAll(".mermaid"),
+				});
+			}
+
+			async function loadFile(path) {
+				const response = await fetch(path, { cache: "no-store" });
+				if (!response.ok) {
+					throw new Error(`Failed to load ${path}`);
+				}
+				return response.text();
+			}
+
+			async function renderFile(path) {
+				currentFile = path;
+				document.getElementById("active-tab").textContent =
+					fileName(path);
+				document.getElementById("tree-root").innerHTML = renderTree(
+					FILE_TREE,
+					path,
+				);
+				wireTreeNavigation();
+
+				try {
+					const markdown = await loadFile(path);
+					sourceRoot().textContent = markdown;
+					await renderPreview(markdown);
+				} catch (error) {
+					sourceRoot().textContent = "";
+					previewRoot().innerHTML = `
+						<section class="error-state">
+							<h2>Unable to load file</h2>
+							<p>${escapeHtml(String(error.message || error))}</p>
+						</section>
+					`;
+				}
+			}
+
+			async function syncFromHash() {
+				const path = getHashPath();
+				await renderFile(path);
+			}
+
+			window.addEventListener("DOMContentLoaded", async () => {
+				installMarkdownOptions();
+				applyTheme(getTheme());
+
+				document
+					.getElementById("theme-toggle")
+					.addEventListener("click", async () => {
+						const nextTheme =
+							document.documentElement.dataset.theme === "dark"
+								? "light"
+								: "dark";
+						applyTheme(nextTheme);
+						await renderFile(currentFile);
+					});
+
+				if (!window.location.hash) {
+					setHashPath(DEFAULT_FILE);
+					return;
+				}
+
+				await syncFromHash();
+			});
+
+			window.addEventListener("hashchange", syncFromHash);
+		</script>
+
+		<style>
+			:root {
+				--bg: #edf2fb;
+				--paper: #ffffff;
+				--editor: #fbfcfe;
+				--sidebar: #f5f7fb;
+				--chrome: #eef2f8;
+				--chrome-strong: #d7dfed;
+				--ink: #172033;
+				--muted: #64748b;
+				--line: #e2e8f0;
+				--accent: #2563eb;
+				--accent-soft: #dbeafe;
+				--code-bg: #f3f6fb;
+				--bg-glow-strong: rgba(248, 251, 255, 0.92);
+				--bg-glow-soft: rgba(237, 242, 251, 0.84);
+				--mono: "SFMono-Regular", "IBM Plex Mono", "Cascadia Code",
+					Consolas, monospace;
+				--shadow: 0 24px 80px rgba(15, 23, 42, 0.13);
+			}
+
+			:root[data-theme="dark"] {
+				--bg: #08111f;
+				--paper: #0b1220;
+				--editor: #0f172a;
+				--sidebar: #0b1426;
+				--chrome: #101a2f;
+				--chrome-strong: #22314f;
+				--ink: #e5ecf5;
+				--muted: #94a3b8;
+				--line: #20304a;
+				--accent: #7cb7ff;
+				--accent-soft: #1d3259;
+				--code-bg: #111c31;
+				--bg-glow-strong: rgba(31, 99, 235, 0.2);
+				--bg-glow-soft: rgba(10, 17, 31, 0);
+				--shadow: 0 28px 90px rgba(2, 6, 23, 0.45);
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				background: radial-gradient(
+						circle at top left,
+						var(--bg-glow-strong) 0,
+						var(--bg-glow-soft) 38%,
+						transparent 62%
+					),
+					linear-gradient(
+						180deg,
+						var(--bg) 0%,
+						color-mix(in srgb, var(--bg) 92%, #000 8%) 100%
+					);
+				color: var(--ink);
+				font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+					BlinkMacSystemFont, "Segoe UI", sans-serif;
+				line-height: 1.5;
+				transition: background 140ms ease, color 140ms ease;
+			}
+
+			.page {
+				width: min(1360px, calc(100% - 36px));
+				margin: 0 auto;
+				padding: 56px 0 88px;
+			}
+
+			.page-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 24px;
+				margin-bottom: 28px;
+			}
+
+			.page-header-copy {
+				max-width: 760px;
+			}
+
+			.eyebrow {
+				margin: 0 0 12px;
+				color: var(--accent);
+				font-family: var(--mono);
+				font-size: 0.76rem;
+				font-weight: 700;
+				letter-spacing: 0.12em;
+				text-transform: uppercase;
 			}
 
 			h1 {
+				margin: 0;
+				font-size: clamp(2.4rem, 5vw, 4.8rem);
+				line-height: 0.95;
+				letter-spacing: -0.06em;
+			}
+
+			.readme-workbench {
+				position: relative;
+			}
+
+			.view-input {
+				position: absolute;
+				opacity: 0;
+				pointer-events: none;
+			}
+
+			.workbench {
+				display: grid;
+				grid-template-columns: 260px minmax(0, 1fr);
+				border: 1px solid var(--chrome-strong);
+				border-radius: 24px;
+				overflow: hidden;
+				background: var(--paper);
+				box-shadow: var(--shadow);
+			}
+
+			.sidebar {
+				background: linear-gradient(
+					180deg,
+					color-mix(in srgb, var(--sidebar) 92%, #fff 8%) 0%,
+					var(--sidebar) 100%
+				);
+				border-right: 1px solid var(--chrome-strong);
+				padding: 18px 14px 20px;
+			}
+
+			.sidebar-label {
+				margin: 0 0 12px;
+				color: var(--muted);
+				font-family: var(--mono);
+				font-size: 0.72rem;
+				font-weight: 700;
+				letter-spacing: 0.1em;
+				text-transform: uppercase;
+			}
+
+			.tree-folder {
+				margin: 4px 0 0;
+			}
+
+			.tree-folder summary {
+				cursor: pointer;
+				list-style: none;
+				padding: 8px 10px;
+				border-radius: 10px;
+				color: color-mix(in srgb, var(--ink) 82%, transparent 18%);
+				font-family: var(--mono);
+				font-size: 0.82rem;
+				user-select: none;
+			}
+
+			.tree-folder summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.tree-folder summary::before {
+				content: "▸";
+				display: inline-block;
+				margin-right: 8px;
+				color: var(--muted);
+				transform: translateY(-1px);
+			}
+
+			.tree-folder[open] > summary::before {
+				content: "▾";
+			}
+
+			.tree-children {
+				margin-left: 18px;
+			}
+
+			.tree-file {
+				display: block;
+				width: 100%;
+				margin: 4px 0 0;
+				padding: 8px 10px;
+				border: 0;
+				border-radius: 10px;
+				background: transparent;
+				color: color-mix(in srgb, var(--ink) 82%, transparent 18%);
+				font-family: var(--mono);
+				font-size: 0.82rem;
+				text-align: left;
+				cursor: pointer;
+			}
+
+			.tree-file::before {
+				content: "• ";
+				color: var(--muted);
+			}
+
+			.tree-file-active {
+				background: color-mix(
+					in srgb,
+					var(--accent) 14%,
+					transparent 86%
+				);
+				color: var(--accent);
+				font-weight: 700;
+			}
+
+			.tree-file-active::before {
+				color: var(--accent);
+			}
+
+			.main-pane {
+				display: flex;
+				flex-direction: column;
+				min-width: 0;
+				background: var(--paper);
+			}
+
+			.toolbar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 16px;
+				padding: 12px 16px;
+				border-bottom: 1px solid var(--line);
+				background: color-mix(in srgb, var(--paper) 94%, #fff 6%);
+			}
+
+			.file-tab {
+				padding: 9px 12px;
+				border: 1px solid var(--line);
+				border-radius: 12px 12px 0 0;
+				background: linear-gradient(
+					180deg,
+					color-mix(in srgb, var(--code-bg) 78%, #fff 22%) 0%,
+					var(--code-bg) 100%
+				);
+				color: color-mix(in srgb, var(--ink) 84%, transparent 16%);
+				font-family: var(--mono);
+				font-size: 0.84rem;
+				font-weight: 700;
+			}
+
+			.toolbar-actions {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.view-toggle label {
+				border: 1px solid var(--line);
+				background: color-mix(
+					in srgb,
+					var(--paper) 92%,
+					var(--code-bg) 8%
+				);
+				color: var(--muted);
+				font-family: var(--mono);
+				font-size: 0.78rem;
+				font-weight: 700;
+				cursor: pointer;
+			}
+
+			.theme-toggle {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 46px;
+				height: 46px;
+				padding: 0;
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				background: color-mix(
+					in srgb,
+					var(--paper) 88%,
+					var(--code-bg) 12%
+				);
+				box-shadow: 0 10px 26px rgba(15, 23, 42, 0.14);
+				font-size: 1.12rem;
+				line-height: 1;
+				cursor: pointer;
+			}
+
+			.view-toggle {
+				display: inline-flex;
+				padding: 4px;
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				background: var(--code-bg);
+			}
+
+			.view-toggle label {
+				padding: 7px 12px;
+				border-radius: 999px;
+				transition: background 120ms ease, color 120ms ease;
+			}
+
+			#view-source:checked ~ .workbench .label-source,
+			#view-preview:checked ~ .workbench .label-preview {
+				background: var(--paper);
+				color: var(--ink);
+			}
+
+			.panel {
+				display: none;
+				min-height: 1100px;
+				background: var(--editor);
+			}
+
+			#view-source:checked ~ .workbench .panel-source {
+				display: block;
+			}
+
+			#view-preview:checked ~ .workbench .panel-preview {
+				display: block;
+			}
+
+			.source-view {
+				margin: 0;
+				padding: 28px 28px 40px 88px;
+				background: linear-gradient(
+					90deg,
+					color-mix(in srgb, var(--code-bg) 92%, #fff 8%) 0,
+					color-mix(in srgb, var(--code-bg) 92%, #fff 8%) 64px,
+					var(--line) 64px,
+					var(--line) 65px,
+					transparent 65px
+				);
+				color: color-mix(in srgb, var(--ink) 86%, transparent 14%);
+				font-family: var(--mono);
+				font-size: 13px;
+				line-height: 1.72;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+
+			.markdown-view {
+				max-width: 920px;
+				padding: 32px 36px 52px;
+			}
+
+			.markdown-view > * + * {
+				margin-top: 18px;
+			}
+
+			.markdown-view h1,
+			.markdown-view h2,
+			.markdown-view h3 {
 				margin-bottom: 0;
-				font-size: 2.8rem;
-				font-weight: 600;
-			}
-			p.subtitle {
-				color: #666;
-				margin-top: 0.2rem;
-				font-size: 1.1rem;
+				color: var(--ink);
+				letter-spacing: -0.03em;
 			}
 
-			a {
-				color: #2f6ad6;
+			.markdown-view h1 {
+				font-size: clamp(2rem, 3vw, 3rem);
+				line-height: 1;
+			}
+
+			.markdown-view h2 {
+				padding-bottom: 10px;
+				border-bottom: 1px solid var(--line);
+				font-size: 1.35rem;
+			}
+
+			.markdown-view p,
+			.markdown-view li {
+				color: var(--muted);
+				font-size: 1rem;
+			}
+
+			.markdown-view ul,
+			.markdown-view ol {
+				padding-left: 1.3rem;
+			}
+
+			.markdown-view li + li {
+				margin-top: 10px;
+			}
+
+			.markdown-view code {
+				padding: 0.14em 0.38em;
+				border: 1px solid var(--line);
+				border-radius: 7px;
+				background: var(--code-bg);
+				color: color-mix(in srgb, var(--ink) 88%, transparent 12%);
+				font-family: var(--mono);
+				font-size: 0.88em;
+			}
+
+			.markdown-view pre code {
+				padding: 0;
+				border: 0;
+				background: transparent;
+			}
+
+			.markdown-view a {
+				color: var(--accent);
 				text-decoration: none;
-				margin: 0 12px;
-				font-weight: 500;
 			}
 
-			.bio {
-				max-width: 600px;
-				margin: 0rem auto 0;
-				font-size: 1.05rem;
-				line-height: 1.65;
+			.markdown-view a:hover {
+				text-decoration: underline;
+			}
+
+			.markdown-view img {
+				display: block;
+				width: min(220px, 100%);
+				border-radius: 20px;
+				box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+			}
+
+			.markdown-view hr {
+				border: 0;
+				border-top: 1px solid var(--line);
+			}
+
+			.diagram-frame,
+			.markdown-view pre:not(:has(code.language-mermaid)) {
+				margin-top: 18px;
+				padding: 18px;
+				border: 1px solid var(--line);
+				border-radius: 20px;
+				background: color-mix(in srgb, var(--paper) 96%, #fff 4%);
+				box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+				overflow-x: auto;
+			}
+
+			.markdown-view pre:not(:has(code.language-mermaid)) {
+				color: color-mix(in srgb, var(--ink) 86%, transparent 14%);
+				font-family: var(--mono);
+				font-size: 13px;
+				line-height: 1.7;
+			}
+
+			.mermaid {
+				display: flex;
+				justify-content: center;
+				min-width: 560px;
+			}
+
+			.mermaid svg {
+				max-width: 100%;
+				height: auto;
+			}
+
+			.markdown-view table {
+				width: 100%;
+				margin-top: 18px;
+				border-collapse: collapse;
+				font-size: 0.92rem;
+				overflow: hidden;
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				display: block;
+				overflow-x: auto;
+				background: var(--paper);
+			}
+
+			.markdown-view thead {
+				background: color-mix(in srgb, var(--code-bg) 88%, #fff 12%);
+			}
+
+			.markdown-view th,
+			.markdown-view td {
+				padding: 12px 14px;
+				border-bottom: 1px solid var(--line);
+				text-align: left;
+				white-space: nowrap;
+			}
+
+			.markdown-view tr:last-child td {
+				border-bottom: 0;
+			}
+
+			.error-state {
+				padding: 32px 36px;
+			}
+
+			.error-state h2 {
+				margin: 0 0 12px;
+				color: var(--ink);
+			}
+
+			.statusbar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 14px;
+				padding: 9px 14px;
+				border-top: 1px solid #1e44ab;
+				background: linear-gradient(180deg, #2763e3 0%, #1d4ed8 100%);
+				color: #eef4ff;
+				font-family: var(--mono);
+				font-size: 0.76rem;
+			}
+
+			.statusbar span:last-child {
+				opacity: 0.9;
+			}
+
+			@media (max-width: 980px) {
+				.page {
+					width: min(100% - 24px, 860px);
+					padding-top: 42px;
+				}
+
+				.workbench {
+					grid-template-columns: 1fr;
+				}
+
+				.sidebar {
+					display: none;
+				}
+
+				.toolbar,
+				.statusbar {
+					flex-wrap: wrap;
+				}
+
+				.markdown-view {
+					padding: 26px 22px 42px;
+				}
+
+				.source-view {
+					padding: 24px 22px 34px;
+					background: none;
+				}
+			}
+
+			@media (max-width: 640px) {
+				.page {
+					width: calc(100% - 20px);
+				}
+
+				.page-header {
+					gap: 16px;
+				}
+
+				.toolbar {
+					align-items: flex-start;
+				}
+
+				.toolbar-actions {
+					width: 100%;
+					flex-wrap: wrap;
+				}
+
+				.view-toggle {
+					width: 100%;
+				}
+
+				.view-toggle label {
+					flex: 1 1 0;
+					text-align: center;
+				}
+
+				.mermaid {
+					min-width: 440px;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<!-- ⭐ Your centered profile image -->
-		<img src="gradpic_medium.jpg" alt="Caroline Hughes" class="profile" />
+		<main class="page">
+			<header class="page-header">
+				<div class="page-header-copy">
+					<p class="eyebrow">Portfolio Filesystem</p>
+					<h1>Caroline Hughes</h1>
+				</div>
+				<button
+					id="theme-toggle"
+					class="theme-toggle"
+					type="button"
+					aria-label="Switch to light mode"
+					title="Switch to light mode"
+				>
+					🌙
+				</button>
+			</header>
 
-		<h1>Caroline Hughes</h1>
+			<section class="readme-workbench" aria-label="Portfolio workbench">
+				<input
+					id="view-preview"
+					class="view-input"
+					type="radio"
+					name="view-mode"
+					checked
+				/>
+				<input
+					id="view-source"
+					class="view-input"
+					type="radio"
+					name="view-mode"
+				/>
 
-		<p>
-			<a href="https://github.com/caroline-hughes">GitHub</a> /
-			<a href="https://www.linkedin.com/in/cg-hughes">LinkedIn</a> /
-			<a href="mailto:carolinehughes1717@gmail.com">Email</a>
-		</p>
+				<div class="workbench">
+					<aside class="sidebar">
+						<p class="sidebar-label">Explorer</p>
+						<div id="tree-root"></div>
+					</aside>
 
-		<p style="margin-top: 1.5rem; color: #444; font-size: 1.05rem">
-			B.S. Computer Science, Northeastern University (2023)
-		</p>
-		<p class="bio">
-			I build backend systems that help real people. Currently at Oracle
-			Health & AI.
-		</p>
-		<hr
-			style="
-				margin: 3rem auto;
-				max-width: 600px;
-				border: 0;
-				border-top: 1px solid #eee;
-			"
-		/>
+					<div class="main-pane">
+						<div class="toolbar">
+							<div class="file-tab" id="active-tab">
+								resume.md
+							</div>
+							<div class="toolbar-actions">
+								<div
+									class="view-toggle"
+									aria-label="File view mode"
+								>
+									<label
+										class="label-source"
+										for="view-source"
+										>Source</label
+									>
+									<label
+										class="label-preview"
+										for="view-preview"
+										>Preview</label
+									>
+								</div>
+							</div>
+						</div>
 
-		<h2 style="font-size: 1.6rem; font-weight: 600; margin-top: 2rem">
-			Selected Projects
-		</h2>
+						<div class="panel panel-source">
+							<pre id="source-pane" class="source-view"></pre>
+						</div>
 
-		<div
-			style="
-				max-width: 600px;
-				margin: 1.5rem auto;
-				text-align: left;
-				font-size: 1.05rem;
-				line-height: 1.6;
-			"
-		>
-			<p>
-				<a href="https://github.com/caroline-hughes/unixShell"
-					>Unix Shell</a
-				>
-				— minimal Unix shell implementing process control & execvp.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/raft"
-					>Raft KV Store</a
-				>
-				— distributed key-value store using Raft leader election & log
-				replication.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/ftpClient"
-					>FTP Client</a
-				>
-				— full FTP implementation with PASV mode and binary transfer.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/bgpRouter"
-					>BGP Router</a
-				>
-				— simulated BGP routing with prefix matching & policy rules.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/wordleClient"
-					>Wordle Network Client</a
-				>
-				— TCP/TLS JSON-protocol client with constraint solver.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/fakebook-crawler"
-					>HTTP Web Crawler</a
-				>
-				— raw-socket HTTP/1.1 crawler with login + recursive traversal.
-			</p>
-		</div>
-		<br />
-		<br />
+						<div class="panel panel-preview">
+							<article
+								id="preview-pane"
+								class="markdown-view"
+							></article>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
 	</body>
 </html>
