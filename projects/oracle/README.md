@@ -10,8 +10,8 @@ Below are a few of the projects I worked on that I think best represent that pro
 
 ## Selected Projects
 
--   [Configuration Service](#/projects/oracle/config-service.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-infra">infra</span>
+-   [Configuration Service](#/projects/oracle/config-service.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-infra">infra</span> <span class="project-pill project-pill-cloud">cloud</span>
 -   [Rules Engine](#/projects/oracle/rules-engine.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-agentic">agentic</span>
 -   [Registration AI Mode](#/projects/oracle/registration-ai-mode.md) <span class="project-pill project-pill-frontend">frontend</span> <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-agentic">agentic</span>
--   [Control Plane](#/projects/oracle/control-plane.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-infra">infra</span>
+-   [Control Plane](#/projects/oracle/control-plane.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-infra">infra</span> <span class="project-pill project-pill-cloud">cloud</span>
 -   [Patient Dedupe Agent](#/projects/oracle/dedupe-agent.md) <span class="project-pill project-pill-backend">backend</span> <span class="project-pill project-pill-agentic">agentic</span>

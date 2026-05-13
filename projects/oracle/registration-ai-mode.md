@@ -2,6 +2,8 @@
 
 End-to-end reimagining of patient registration using agent-driven workflows, conversational interfaces, and rapid AI-assisted development.
 
+<p><span class="project-pill project-pill-python">Python</span> <span class="project-pill project-pill-kafka">Kafka</span> <span class="project-pill project-pill-frontend">React/TypeScript</span> <span class="project-pill project-pill-agentic">Agentic</span></p>
+
 ## What I built
 
 A set of **AI-native registration experiences** that replaced traditional form-based workflows with agent-driven interactions.

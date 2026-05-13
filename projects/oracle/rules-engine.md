@@ -2,6 +2,8 @@
 
 Centralized platform for defining and executing configurable business logic across a healthcare microservice ecosystem.
 
+<p><span class="project-pill project-pill-java">Java</span> <span class="project-pill project-pill-rules">Drools</span> <span class="project-pill project-pill-search">Semantic Index</span></p>
+
 ## What I built
 
 A rules engine that allowed teams (and eventually tenants) to define **dynamic business logic** outside of application code.

@@ -1,13 +1,16 @@
 # Configuration Service
 
-Built and owned a centralized configuration platform for a large healthcare microservice ecosystem at Oracle Health & AI.
+Centralized configuration platform for a large healthcare microservice ecosystem.
+
+<p><span class="project-pill project-pill-java">Java</span> <span class="project-pill project-pill-sql">SQL / Liquibase</span> <span class="project-pill project-pill-kubernetes">Kubernetes</span></p>
 
 ## What I built
 
-A `(key, value, scope)` configuration service that replaced scattered Helm/env-based configs with a single, programmatic system.
+A `(key, value, scope)` configuration service (APIs + client library) that replaced scattered Helm/env-based configs with a single, programmatic service.
 
 -   supported feature flags + environment configs
 -   enabled hierarchical overrides (global → region → tenant → org)
+-   exposed a POST API for services to register their config definitions
 -   exposed via a shared client library used across 10+ services
 
 ```mermaid
@@ -67,9 +70,9 @@ Configuration was becoming unmanageable:
 
 This system:
 
--   became the **single source of truth** for configs
--   enabled **safe, flexible overrides per tenant/org**
--   **reduced deployment risk** by decoupling config from Helm
+-   became the single source of truth for configs
+-   enabled runtime safe, flexible overrides per tenant/org
+-   hugely reduced probability for deployment issues by decoupling config from Helm
 
 ## How it worked
 
@@ -85,8 +88,8 @@ ORG > TENANT > REGION > GLOBAL
 ## My impact
 
 -   owned design + implementation end-to-end
--   migrated core microservices onto the platform
--   improved reliability of service startup and deployments
--   became a critical dependency across the system
+-   wrote plan for phased migration of core microservices onto the platform
+-   served as point person for carrying out the migration^
+-   overall, saw improved reliability of services, both at deployment time and during runtime
 
-→ Result: simpler config management, safer deployments, and scalable support for multi-tenant customization
+⚡ Result: simpler config management, safer deployments, and scalable support for multi-tenant customization

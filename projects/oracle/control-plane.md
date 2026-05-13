@@ -2,6 +2,8 @@
 
 Platform for provisioning and managing tenant-specific infrastructure in a multi-tenant healthcare system.
 
+<p><span class="project-pill project-pill-java">Java</span> <span class="project-pill project-pill-oci">OCI</span> <span class="project-pill project-pill-terraform">Terraform</span></p>
+
 ## What I built
 
 A control plane service responsible for automating the setup of new client (hospital) environments in Oracle Cloud.

@@ -2,6 +2,8 @@
 
 System for detecting potential duplicate patient records during registration.
 
+<p><span class="project-pill project-pill-python">Python</span> <span class="project-pill project-pill-agentic">Agentic</span> <span class="project-pill project-pill-search">Semantic Index</span></p>
+
 ## What I built
 
 A Python agent that identifies potential duplicate patients by querying the Semantic Index using fuzzy matching techniques.

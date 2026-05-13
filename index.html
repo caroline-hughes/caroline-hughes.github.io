@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Caroline Hughes</title>
 		<!-- Add your Adobe Fonts web-project embed here to load Galix Mono on the site. -->
-		<link rel="stylesheet" href="styles.css" />
+		<link rel="stylesheet" href="styles.css?v=2026-05-13-1" />
 
 		<script>
 			(() => {
@@ -35,7 +35,6 @@
 					"projects/oracle/config-service.md",
 			};
 			const FILE_TREE = [
-				{ type: "file", path: "about.md", label: "about.md" },
 				{ type: "file", path: "resume.md", label: "resume.md" },
 				{
 					type: "folder",
@@ -138,6 +137,7 @@
 			const sourceRoot = () => document.getElementById("source-pane");
 
 			let currentFile = DEFAULT_FILE;
+			const openFolders = new Set();
 
 			function getTheme() {
 				return localStorage.getItem(THEME_KEY) || "dark";
@@ -221,7 +221,7 @@
 					.replaceAll(">", "&gt;");
 			}
 
-			function renderTree(nodes, currentPath) {
+			function renderTree(nodes, currentPath, parentKey = "") {
 				return nodes
 					.map((node) => {
 						if (node.type === "file") {
@@ -240,16 +240,21 @@
 							`;
 						}
 
+						const folderKey = parentKey
+							? `${parentKey}/${node.label}`
+							: node.label;
+						const isOpen =
+							node.defaultOpen ||
+							openFolders.has(folderKey) ||
+							containsPath(node, currentPath);
+
 						return `
-							<details class="tree-folder" ${
-								node.defaultOpen ||
-								containsPath(node, currentPath)
-									? "open"
-									: ""
+							<details class="tree-folder" data-folder-key="${folderKey}" ${
+								isOpen ? "open" : ""
 							}>
 								<summary>${node.label}</summary>
 								<div class="tree-children">
-									${renderTree(node.children, currentPath)}
+									${renderTree(node.children, currentPath, folderKey)}
 								</div>
 							</details>
 						`;
@@ -258,6 +263,18 @@
 			}
 
 			function wireTreeNavigation() {
+				document.querySelectorAll(".tree-folder").forEach((folder) => {
+					folder.addEventListener("toggle", () => {
+						const folderKey = folder.dataset.folderKey;
+						if (!folderKey) return;
+						if (folder.open) {
+							openFolders.add(folderKey);
+							return;
+						}
+						openFolders.delete(folderKey);
+					});
+				});
+
 				document.querySelectorAll(".tree-file").forEach((button) => {
 					button.addEventListener("click", () => {
 						const path = button.dataset.path;
