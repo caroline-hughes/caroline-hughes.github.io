@@ -4,139 +4,515 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Caroline Hughes</title>
-		<style>
-			body {
-				margin: 0;
-				font-family: "Inter", -apple-system, BlinkMacSystemFont,
-					sans-serif;
-				color: #222;
-				background: #fff;
-				padding: 60px 20px;
-				text-align: center;
-				opacity: 0;
-				animation: fadein 1.2s ease forwards;
+		<!-- Add your Adobe Fonts web-project embed here to load Galix Mono on the site. -->
+		<link rel="stylesheet" href="styles.css?v=2026-05-13-1" />
+
+		<script>
+			(() => {
+				try {
+					const theme =
+						localStorage.getItem("portfolio-theme") || "dark";
+					document.documentElement.dataset.theme = theme;
+					document.documentElement.style.colorScheme = theme;
+				} catch {
+					document.documentElement.dataset.theme = "dark";
+					document.documentElement.style.colorScheme = "dark";
+				}
+			})();
+		</script>
+
+		<script type="module">
+			import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+			import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
+			const DEFAULT_FILE = "resume.md";
+			const THEME_KEY = "portfolio-theme";
+			const PATH_ALIASES = {
+				"oracle/README.md": "projects/oracle/README.md",
+				"projects/oracle/configuration-service.md":
+					"projects/oracle/config-service.md",
+				"projects/oracle/config-service-portfolio.md":
+					"projects/oracle/config-service.md",
+			};
+			const FILE_TREE = [
+				{ type: "file", path: "resume.md", label: "resume.md" },
+				{
+					type: "folder",
+					label: "projects",
+					defaultOpen: true,
+					children: [
+						{
+							type: "folder",
+							label: "oracle",
+							children: [
+								{
+									type: "file",
+									path: "projects/oracle/README.md",
+									label: "README.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/config-service.md",
+									label: "config-service.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/rules-engine.md",
+									label: "rules-engine.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/registration-ai-mode.md",
+									label: "registration-ai-mode.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/control-plane.md",
+									label: "control-plane.md",
+								},
+								{
+									type: "file",
+									path: "projects/oracle/dedupe-agent.md",
+									label: "dedupe-agent.md",
+								},
+							],
+						},
+						{
+							type: "folder",
+							label: "undergrad",
+							children: [
+								{
+									type: "file",
+									path: "projects/undergrad/README.md",
+									label: "README.md",
+								},
+								{
+									type: "file",
+									path: "projects/undergrad/raft.md",
+									label: "raft.md",
+								},
+								{
+									type: "file",
+									path: "projects/undergrad/bgp-router.md",
+									label: "bgp-router.md",
+								},
+								{
+									type: "file",
+									path: "projects/undergrad/unix-shell.md",
+									label: "unix-shell.md",
+								},
+							],
+						},
+					],
+				},
+			];
+
+			const previewRoot = () => document.getElementById("preview-pane");
+			const sourceRoot = () => document.getElementById("source-pane");
+
+			let currentFile = DEFAULT_FILE;
+			const openFolders = new Set();
+
+			function getTheme() {
+				return localStorage.getItem(THEME_KEY) || "dark";
 			}
-			@keyframes fadein {
-				to {
-					opacity: 1;
+
+			function applyTheme(theme) {
+				document.documentElement.dataset.theme = theme;
+				document.documentElement.style.colorScheme = theme;
+				localStorage.setItem(THEME_KEY, theme);
+				const themeButton = document.getElementById("theme-toggle");
+				if (themeButton) {
+					const nextTheme = theme === "dark" ? "light" : "dark";
+					themeButton.textContent = theme === "dark" ? "🌙" : "☀️";
+					themeButton.setAttribute(
+						"aria-label",
+						`Switch to ${nextTheme} mode`,
+					);
+					themeButton.setAttribute(
+						"title",
+						`Switch to ${nextTheme} mode`,
+					);
 				}
 			}
 
-			img.profile {
-				width: 180px;
-				height: 180px;
-				border-radius: 50%;
-				object-fit: cover;
-				box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-				margin-bottom: 24px;
+			function mermaidConfig() {
+				const dark = document.documentElement.dataset.theme === "dark";
+				return {
+					startOnLoad: false,
+					theme: "base",
+					themeVariables: {
+						fontFamily:
+							"'SFMono-Regular', 'IBM Plex Mono', 'Cascadia Code', Consolas, monospace",
+						primaryTextColor: dark ? "#E5ECF5" : "#172033",
+						lineColor: dark ? "#7F8EA7" : "#78909C",
+						background: dark ? "#111827" : "#FFFFFF",
+						mainBkg: dark ? "#111827" : "#FFFFFF",
+						clusterBkg: dark ? "#0F172A" : "#F8FAFC",
+						clusterBorder: dark ? "#334155" : "#CBD5E1",
+						actorBorder: dark ? "#334155" : "#2563EB",
+						actorLineColor: dark ? "#334155" : "#2563EB",
+						labelBoxBorderColor: dark ? "#334155" : "#2563EB",
+						labelBoxBkgColor: dark ? "#0F172A" : "transparent",
+						activationBorderColor: dark ? "#334155" : "#2563EB",
+						activationBkgColor: dark ? "#111827" : "transparent",
+						signalColor: dark ? "#E5ECF5" : "#374151",
+						signalTextColor: dark ? "#E5ECF5" : "#172033",
+					},
+					flowchart: {
+						curve: "natural",
+						htmlLabels: true,
+					},
+					sequence: {
+						actorMargin: 72,
+						boxMargin: 12,
+						mirrorActors: false,
+						showSequenceNumbers: false,
+					},
+				};
 			}
 
-			h1 {
-				margin-bottom: 0;
-				font-size: 2.8rem;
-				font-weight: 600;
-			}
-			p.subtitle {
-				color: #666;
-				margin-top: 0.2rem;
-				font-size: 1.1rem;
+			function getHashPath() {
+				const hash = window.location.hash.replace(/^#\/?/, "");
+				return PATH_ALIASES[hash] || hash || DEFAULT_FILE;
 			}
 
-			a {
-				color: #2f6ad6;
-				text-decoration: none;
-				margin: 0 12px;
-				font-weight: 500;
+			function getCanonicalPath(path) {
+				return PATH_ALIASES[path] || path;
 			}
 
-			.bio {
-				max-width: 600px;
-				margin: 0rem auto 0;
-				font-size: 1.05rem;
-				line-height: 1.65;
+			function setHashPath(path) {
+				window.location.hash = `#/${path}`;
 			}
-		</style>
+
+			function containsPath(node, path) {
+				if (node.type === "file") {
+					return node.path === path;
+				}
+				return node.children.some((child) => containsPath(child, path));
+			}
+
+			function fileName(path) {
+				return path.split("/").pop();
+			}
+
+			function isProjectDetailPath(path) {
+				return path.startsWith("projects/") && fileName(path) !== "README.md";
+			}
+
+			function escapeHtml(value) {
+				return value
+					.replaceAll("&", "&amp;")
+					.replaceAll("<", "&lt;")
+					.replaceAll(">", "&gt;");
+			}
+
+			function renderTree(nodes, currentPath, parentKey = "") {
+				return nodes
+					.map((node) => {
+						if (node.type === "file") {
+							const activeClass =
+								node.path === currentPath
+									? " tree-file-active"
+									: "";
+							return `
+								<button
+									class="tree-file${activeClass}"
+									data-path="${node.path}"
+									type="button"
+								>
+									${node.label}
+								</button>
+							`;
+						}
+
+						const folderKey = parentKey
+							? `${parentKey}/${node.label}`
+							: node.label;
+						const isOpen =
+							node.defaultOpen ||
+							openFolders.has(folderKey) ||
+							containsPath(node, currentPath);
+
+						return `
+							<details class="tree-folder" data-folder-key="${folderKey}" ${
+								isOpen ? "open" : ""
+							}>
+								<summary>${node.label}</summary>
+								<div class="tree-children">
+									${renderTree(node.children, currentPath, folderKey)}
+								</div>
+							</details>
+						`;
+					})
+					.join("");
+			}
+
+			function wireTreeNavigation() {
+				document.querySelectorAll(".tree-folder").forEach((folder) => {
+					folder.addEventListener("toggle", () => {
+						const folderKey = folder.dataset.folderKey;
+						if (!folderKey) return;
+						if (folder.open) {
+							openFolders.add(folderKey);
+							return;
+						}
+						openFolders.delete(folderKey);
+					});
+				});
+
+				document.querySelectorAll(".tree-file").forEach((button) => {
+					button.addEventListener("click", () => {
+						const path = button.dataset.path;
+						if (path) setHashPath(path);
+					});
+				});
+			}
+
+			function installMarkdownOptions() {
+				marked.setOptions({
+					gfm: true,
+					breaks: false,
+				});
+			}
+
+			async function renderPreview(markdown) {
+				const preview = previewRoot();
+				if (!preview) return;
+
+				if (!markdown.trim()) {
+					preview.innerHTML = "";
+					return;
+				}
+
+				preview.innerHTML = marked.parse(markdown);
+
+				preview.querySelectorAll("p").forEach((paragraph) => {
+					const text = (paragraph.textContent || "").trim();
+					if (text === "[[diagram-float-right]]") {
+						const marker = document.createElement("div");
+						marker.className = "diagram-float-right";
+						paragraph.replaceWith(marker);
+						return;
+					}
+					if (text === "[[flow-clear]]") {
+						const marker = document.createElement("div");
+						marker.className = "flow-clear";
+						paragraph.replaceWith(marker);
+					}
+				});
+
+				preview.querySelectorAll("a").forEach((link) => {
+					const href = link.getAttribute("href") || "";
+					if (href.startsWith("#/")) {
+						link.addEventListener("click", (event) => {
+							event.preventDefault();
+							window.location.hash = href;
+						});
+						return;
+					}
+
+					if (href.startsWith("#")) {
+						link.addEventListener("click", (event) => {
+							event.preventDefault();
+							const target = preview.querySelector(href);
+							if (!target) return;
+							const details = target.closest("details");
+							if (details) details.open = true;
+							if (target.tagName === "DETAILS") {
+								target.open = true;
+							}
+							target.scrollIntoView({
+								behavior: "smooth",
+								block: "start",
+							});
+						});
+						return;
+					}
+
+					link.target = "_blank";
+					link.rel = "noreferrer";
+				});
+
+				preview
+					.querySelectorAll("pre > code.language-mermaid")
+					.forEach((code) => {
+						const pre = code.parentElement;
+						if (!pre) return;
+						const mermaidBlock = document.createElement("pre");
+						mermaidBlock.className = "mermaid";
+						mermaidBlock.textContent = code.textContent || "";
+						pre.replaceWith(mermaidBlock);
+					});
+
+				preview
+					.querySelectorAll(".diagram-float-right")
+					.forEach((container) => {
+						const next = container.nextElementSibling;
+						if (!next || !next.classList.contains("mermaid")) return;
+						container.appendChild(next);
+					});
+
+				mermaid.initialize(mermaidConfig());
+				await mermaid.run({
+					nodes: preview.querySelectorAll(".mermaid"),
+				});
+			}
+
+			async function loadFile(path) {
+				const response = await fetch(path, { cache: "no-store" });
+				if (!response.ok) {
+					throw new Error(`Failed to load ${path}`);
+				}
+				return response.text();
+			}
+
+			async function renderFile(path) {
+				currentFile = path;
+				document.getElementById("active-tab").textContent =
+					fileName(path);
+				const preview = previewRoot();
+				if (preview) {
+					preview.classList.toggle(
+						"project-detail-page",
+						isProjectDetailPath(path),
+					);
+				}
+				document.getElementById("tree-root").innerHTML = renderTree(
+					FILE_TREE,
+					path,
+				);
+				wireTreeNavigation();
+
+				try {
+					const markdown = await loadFile(path);
+					sourceRoot().textContent = markdown;
+					await renderPreview(markdown);
+				} catch (error) {
+					sourceRoot().textContent = "";
+					previewRoot().innerHTML = `
+						<section class="error-state">
+							<h2>Unable to load file</h2>
+							<p>${escapeHtml(String(error.message || error))}</p>
+						</section>
+					`;
+				}
+			}
+
+			async function syncFromHash() {
+				const rawPath = window.location.hash.replace(/^#\/?/, "");
+				const path = getHashPath();
+				if (rawPath && getCanonicalPath(rawPath) !== rawPath) {
+					setHashPath(path);
+					return;
+				}
+				await renderFile(path);
+			}
+
+			window.addEventListener("DOMContentLoaded", async () => {
+				installMarkdownOptions();
+				applyTheme(getTheme());
+
+				document
+					.getElementById("theme-toggle")
+					.addEventListener("click", async () => {
+						const nextTheme =
+							document.documentElement.dataset.theme === "dark"
+								? "light"
+								: "dark";
+						applyTheme(nextTheme);
+						await renderFile(currentFile);
+					});
+
+				if (!window.location.hash) {
+					setHashPath(DEFAULT_FILE);
+					return;
+				}
+
+				await syncFromHash();
+			});
+
+			window.addEventListener("hashchange", syncFromHash);
+		</script>
 	</head>
 	<body>
-		<!-- ⭐ Your centered profile image -->
-		<img src="gradpic_medium.jpg" alt="Caroline Hughes" class="profile" />
+		<main class="page">
+			<header class="page-header">
+				<div class="page-header-copy">
+					<p class="eyebrow">Portfolio Filesystem</p>
+					<!-- <h1>Caroline Hughes</h1> -->
+				</div>
+				<div class="page-header-aside">
+					<button
+						id="theme-toggle"
+						class="theme-toggle"
+						type="button"
+						aria-label="Switch to light mode"
+						title="Switch to light mode"
+					>
+						🌙
+					</button>
+				</div>
+			</header>
 
-		<h1>Caroline Hughes</h1>
+			<section class="readme-workbench" aria-label="Portfolio workbench">
+				<input
+					id="view-preview"
+					class="view-input"
+					type="radio"
+					name="view-mode"
+					checked
+				/>
+				<input
+					id="view-source"
+					class="view-input"
+					type="radio"
+					name="view-mode"
+				/>
 
-		<p>
-			<a href="https://github.com/caroline-hughes">GitHub</a> /
-			<a href="https://www.linkedin.com/in/cg-hughes">LinkedIn</a> /
-			<a href="mailto:carolinehughes1717@gmail.com">Email</a>
-		</p>
+				<div class="workbench">
+					<aside class="sidebar">
+						<p class="sidebar-label">Explorer</p>
+						<div id="tree-root"></div>
+					</aside>
 
-		<p style="margin-top: 1.5rem; color: #444; font-size: 1.05rem">
-			B.S. Computer Science, Northeastern University (2023)
-		</p>
-		<p class="bio">
-			I build backend systems that help real people. Currently at Oracle
-			Health & AI.
-		</p>
-		<hr
-			style="
-				margin: 3rem auto;
-				max-width: 600px;
-				border: 0;
-				border-top: 1px solid #eee;
-			"
-		/>
+					<div class="main-pane">
+						<div class="toolbar">
+							<div class="file-tab" id="active-tab">
+								resume.md
+							</div>
+							<div class="toolbar-actions">
+								<div
+									class="view-toggle"
+									aria-label="File view mode"
+								>
+									<label
+										class="label-source"
+										for="view-source"
+										>Source</label
+									>
+									<label
+										class="label-preview"
+										for="view-preview"
+										>Preview</label
+									>
+								</div>
+							</div>
+						</div>
 
-		<h2 style="font-size: 1.6rem; font-weight: 600; margin-top: 2rem">
-			Selected Projects
-		</h2>
+						<div class="panel panel-source">
+							<pre id="source-pane" class="source-view"></pre>
+						</div>
 
-		<div
-			style="
-				max-width: 600px;
-				margin: 1.5rem auto;
-				text-align: left;
-				font-size: 1.05rem;
-				line-height: 1.6;
-			"
-		>
-			<p>
-				<a href="https://github.com/caroline-hughes/unixShell"
-					>Unix Shell</a
-				>
-				— minimal Unix shell implementing process control & execvp.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/raft"
-					>Raft KV Store</a
-				>
-				— distributed key-value store using Raft leader election & log
-				replication.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/ftpClient"
-					>FTP Client</a
-				>
-				— full FTP implementation with PASV mode and binary transfer.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/bgpRouter"
-					>BGP Router</a
-				>
-				— simulated BGP routing with prefix matching & policy rules.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/wordleClient"
-					>Wordle Network Client</a
-				>
-				— TCP/TLS JSON-protocol client with constraint solver.
-			</p>
-			<p>
-				<a href="https://github.com/caroline-hughes/fakebook-crawler"
-					>HTTP Web Crawler</a
-				>
-				— raw-socket HTTP/1.1 crawler with login + recursive traversal.
-			</p>
-		</div>
-		<br />
-		<br />
+						<div class="panel panel-preview">
+							<article
+								id="preview-pane"
+								class="markdown-view"
+							></article>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
 	</body>
 </html>
