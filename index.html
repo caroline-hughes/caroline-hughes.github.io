@@ -103,32 +103,6 @@
 								},
 							],
 						},
-						{
-							type: "folder",
-							label: "other",
-							children: [
-								{
-									type: "file",
-									path: "projects/other/flo.md",
-									label: "flo.md",
-								},
-								{
-									type: "file",
-									path: "projects/other/crosswalk-detector.md",
-									label: "crosswalk-detector.md",
-								},
-								{
-									type: "file",
-									path: "projects/other/crossword-collab.md",
-									label: "crossword-collab.md",
-								},
-								{
-									type: "file",
-									path: "projects/other/MNH-data-pipeline.md",
-									label: "MNH-data-pipeline.md",
-								},
-							],
-						},
 					],
 				},
 			];
@@ -176,6 +150,14 @@
 						mainBkg: dark ? "#111827" : "#FFFFFF",
 						clusterBkg: dark ? "#0F172A" : "#F8FAFC",
 						clusterBorder: dark ? "#334155" : "#CBD5E1",
+						actorBorder: dark ? "#334155" : "#2563EB",
+						actorLineColor: dark ? "#334155" : "#2563EB",
+						labelBoxBorderColor: dark ? "#334155" : "#2563EB",
+						labelBoxBkgColor: dark ? "#0F172A" : "transparent",
+						activationBorderColor: dark ? "#334155" : "#2563EB",
+						activationBkgColor: dark ? "#111827" : "transparent",
+						signalColor: dark ? "#E5ECF5" : "#374151",
+						signalTextColor: dark ? "#E5ECF5" : "#172033",
 					},
 					flowchart: {
 						curve: "natural",
@@ -212,6 +194,10 @@
 
 			function fileName(path) {
 				return path.split("/").pop();
+			}
+
+			function isProjectDetailPath(path) {
+				return path.startsWith("projects/") && fileName(path) !== "README.md";
 			}
 
 			function escapeHtml(value) {
@@ -301,12 +287,45 @@
 
 				preview.innerHTML = marked.parse(markdown);
 
+				preview.querySelectorAll("p").forEach((paragraph) => {
+					const text = (paragraph.textContent || "").trim();
+					if (text === "[[diagram-float-right]]") {
+						const marker = document.createElement("div");
+						marker.className = "diagram-float-right";
+						paragraph.replaceWith(marker);
+						return;
+					}
+					if (text === "[[flow-clear]]") {
+						const marker = document.createElement("div");
+						marker.className = "flow-clear";
+						paragraph.replaceWith(marker);
+					}
+				});
+
 				preview.querySelectorAll("a").forEach((link) => {
 					const href = link.getAttribute("href") || "";
 					if (href.startsWith("#/")) {
 						link.addEventListener("click", (event) => {
 							event.preventDefault();
 							window.location.hash = href;
+						});
+						return;
+					}
+
+					if (href.startsWith("#")) {
+						link.addEventListener("click", (event) => {
+							event.preventDefault();
+							const target = preview.querySelector(href);
+							if (!target) return;
+							const details = target.closest("details");
+							if (details) details.open = true;
+							if (target.tagName === "DETAILS") {
+								target.open = true;
+							}
+							target.scrollIntoView({
+								behavior: "smooth",
+								block: "start",
+							});
 						});
 						return;
 					}
@@ -324,6 +343,14 @@
 						mermaidBlock.className = "mermaid";
 						mermaidBlock.textContent = code.textContent || "";
 						pre.replaceWith(mermaidBlock);
+					});
+
+				preview
+					.querySelectorAll(".diagram-float-right")
+					.forEach((container) => {
+						const next = container.nextElementSibling;
+						if (!next || !next.classList.contains("mermaid")) return;
+						container.appendChild(next);
 					});
 
 				mermaid.initialize(mermaidConfig());
@@ -344,6 +371,13 @@
 				currentFile = path;
 				document.getElementById("active-tab").textContent =
 					fileName(path);
+				const preview = previewRoot();
+				if (preview) {
+					preview.classList.toggle(
+						"project-detail-page",
+						isProjectDetailPath(path),
+					);
+				}
 				document.getElementById("tree-root").innerHTML = renderTree(
 					FILE_TREE,
 					path,

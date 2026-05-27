@@ -72,6 +72,39 @@ These prototypes helped compare usability, speed, and flexibility across approac
     -   Semantic Index (patient create / lookup)
     -   LLM (OpenAI) for reasoning + interpretation
 
+```mermaid
+%%{init: {'flowchart': {'curve': 'basis'}}}%%
+flowchart LR
+    U([Patient / User])
+    F["AI Registration Frontend<br/>chat / hybrid / voice / OCR"]
+    K[[Kafka Event Bus]]
+    SI[("Semantic Index")]
+    L[["LLM (OpenAI)"]]
+
+    subgraph RA["Registration Agent"]
+        direction TB
+        KB[/Plain-English workflow rules/]
+        A[[Python Agent]]
+    end
+
+    U --> F
+    F <--> K
+    K <--> A
+    KB -->|"registration steps + workflow logic"| A
+    A <-->|"patient create / lookup"| SI
+    A <-->|"reasoning + interpretation"| L
+
+    classDef service fill:#DBEAFE,stroke:#2563EB,stroke-width:1.5px,color:#172033
+    classDef core fill:#DBEAFE,stroke:#2563EB,stroke-width:1.5px,color:#172033
+    classDef storage fill:#FFF3E0,stroke:#FB8C00,stroke-width:1px,color:#172033
+    classDef client fill:#F3E8FF,stroke:#8B5CF6,stroke-width:1.5px,color:#172033
+
+    class K,A core
+    class SI storage
+    class U,F,KB,L client
+    style RA fill:#F8FAFC,stroke:#60A5FA,stroke-width:2px,stroke-dasharray: 8 4,rx:18px,ry:18px
+```
+
 ---
 
 ### Agent design
@@ -105,7 +138,7 @@ Multiple full-stack prototypes were built in **~1–2 weeks each**.
 
 ---
 
-## My impact
+<!-- ## My impact
 
 -   co-designed and built all three AI Mode prototypes end-to-end
 -   implemented agent-based backend architecture (Python + Kafka)
@@ -113,4 +146,4 @@ Multiple full-stack prototypes were built in **~1–2 weeks each**.
 -   led Demo Day presentation to org-wide audience
 -   gave internal session on optimizing Codex for full-stack development
 
-→ Result: demonstrated a viable path toward AI-native workflows and influenced how the org approaches intelligent systems
+→ Result: demonstrated a viable path toward AI-native workflows and influenced how the org approaches intelligent systems -->

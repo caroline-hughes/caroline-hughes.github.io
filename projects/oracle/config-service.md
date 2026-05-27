@@ -1,6 +1,6 @@
 # Configuration Service
 
-Centralized configuration platform for a large healthcare microservice ecosystem.
+A centralized service to manage all configs of a large microservice ecosystem.
 
 <p><span class="project-pill project-pill-java">Java</span> <span class="project-pill project-pill-sql">SQL / Liquibase</span> <span class="project-pill project-pill-kubernetes">Kubernetes</span></p>
 
@@ -85,11 +85,47 @@ Example hierarchy:
 
 ORG > TENANT > REGION > GLOBAL
 
-## My impact
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'actorBkg': '#DBEAFE',
+    'actorBorder': '#2563EB',
+    'actorTextColor': '#172033',
+    'actorLineColor': '#60A5FA',
+    'signalColor': '#2563EB',
+    'signalTextColor': '#172033',
+    'labelBoxBkgColor': '#EFF6FF',
+    'labelBoxBorderColor': '#60A5FA',
+    'labelTextColor': '#172033',
+    'noteBkgColor': '#FFF3E0',
+    'noteBorderColor': '#FB8C00',
+    'noteTextColor': '#172033',
+    'activationBkgColor': '#EFF6FF',
+    'activationBorderColor': '#60A5FA',
+    'sequenceNumberColor': '#172033'
+  }
+}}%%
+sequenceDiagram
+    participant S as Backend Service
+    participant L as Config Client Library
+    participant C as Config Service
+    participant DB as SQL DB
+
+    S->>L: getConfig(key, level)
+    L->>C: Request config by key + scope
+    Note over L,C: Cache may satisfy repeated lookups
+    C->>DB: Query matching config entries if needed
+    DB-->>C: Return scoped values
+    C-->>L: Return resolved config
+    L-->>S: Return typed config value
+```
+
+<!-- ## My impact
 
 -   owned design + implementation end-to-end
 -   wrote plan for phased migration of core microservices onto the platform
 -   served as point person for carrying out the migration^
--   overall, saw improved reliability of services, both at deployment time and during runtime
+-   overall, saw improved reliability of services, both at deployment time and during runtime -->
 
-⚡ Result: simpler config management, safer deployments, and scalable support for multi-tenant customization
+<!-- ⚡ Result: simpler config management, safer deployments, and scalable support for multi-tenant customization -->

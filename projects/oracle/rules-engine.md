@@ -81,6 +81,43 @@ At runtime:
 4. executes rules against provided context
 5. returns results (violations, actions, etc.)
 
+```mermaid
+%%{init: {'flowchart': {'curve': 'basis'}}}%%
+flowchart LR
+    S[[Calling Service]]
+    L[["Shared Java Execution Library"]]
+    X[["Runtime Context"]]
+    C[["Rule Instance Cache"]]
+    SI[("Semantic Index")]
+
+    subgraph RE["Rules Engine"]
+        direction TB
+        K[[KIE Session]]
+        D[/DRL Rule Set/]
+        E[[Rule Execution]]
+    end
+
+    S -->|"1. invoke engine"| L
+    L -->|"2. select/load session"| K
+    D --> K
+    L --> X
+    K --> E
+    C -->|"3. cached instances"| E
+    SI -->|"3. fetch rule instances"| C
+    X -->|"4. facts / input"| E
+    E -->|"5. violations / actions / results"| S
+
+    classDef service fill:#DBEAFE,stroke:#2563EB,stroke-width:1.5px,color:#172033
+    classDef core fill:#DBEAFE,stroke:#2563EB,stroke-width:1.5px,color:#172033
+    classDef storage fill:#FFF3E0,stroke:#FB8C00,stroke-width:1px,color:#172033
+    classDef client fill:#F3E8FF,stroke:#8B5CF6,stroke-width:1.5px,color:#172033
+
+    class S,K,E service
+    class SI storage
+    class L,X,C,D client
+    style RE fill:#F8FAFC,stroke:#60A5FA,stroke-width:2px,stroke-dasharray: 8 4,rx:18px,ry:18px
+```
+
 ---
 
 ### Design decisions
@@ -96,7 +133,7 @@ At runtime:
 
 ---
 
-## My impact
+<!-- ## My impact
 
 -   designed and implemented the execution layer + service integration
 -   structured rule sets into logical KIE sessions by domain
@@ -104,4 +141,4 @@ At runtime:
 -   worked through runtime issues (JDK compatibility, Drools quirks, performance)
 -   helped teams model real-world healthcare constraints as executable rules
 
-→ Result: moved business logic out of code and into a flexible, reusable system that supported tenant-specific behavior at scale
+→ Result: moved business logic out of code and into a flexible, reusable system that supported tenant-specific behavior at scale -->

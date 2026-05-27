@@ -2,9 +2,9 @@
 
 A distributed key-value store built on top of the [Raft consensus protocol](https://raft.github.io/). The system runs as a small replica cluster, elects a leader, replicates writes through the Raft log, and keeps `get` / `put` operations consistent even when replicas fail or messages are delayed.
 
-What made this project interesting to me was that it pulled together several different distributed-systems concerns at once: leader election, heartbeats, log replication, quorum-based commits, and client redirection when a follower received a request.
+This project pulls together several distributed systems concerns: leader election, heartbeats, log replication, quorum-based commits, and client redirection when a follower received a request.
 
-## Highlights
+## The gist
 
 -   Leader election with randomized timeouts and `RequestVote` RPCs
 -   Log replication and heartbeat handling through `AppendEntries`
