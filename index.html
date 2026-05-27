@@ -5,18 +5,18 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Caroline Hughes</title>
 		<!-- Add your Adobe Fonts web-project embed here to load Galix Mono on the site. -->
-		<link rel="stylesheet" href="styles.css?v=2026-05-13-1" />
+		<link rel="stylesheet" href="styles.css?v=2026-05-27-3" />
 
 		<script>
 			(() => {
 				try {
 					const theme =
-						localStorage.getItem("portfolio-theme") || "dark";
+						localStorage.getItem("portfolio-theme-v2") || "light";
 					document.documentElement.dataset.theme = theme;
 					document.documentElement.style.colorScheme = theme;
 				} catch {
-					document.documentElement.dataset.theme = "dark";
-					document.documentElement.style.colorScheme = "dark";
+					document.documentElement.dataset.theme = "light";
+					document.documentElement.style.colorScheme = "light";
 				}
 			})();
 		</script>
@@ -26,7 +26,7 @@
 			import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
 			const DEFAULT_FILE = "resume.md";
-			const THEME_KEY = "portfolio-theme";
+			const THEME_KEY = "portfolio-theme-v2";
 			const PATH_ALIASES = {
 				"oracle/README.md": "projects/oracle/README.md",
 				"projects/oracle/configuration-service.md":
@@ -114,7 +114,7 @@
 			const openFolders = new Set();
 
 			function getTheme() {
-				return localStorage.getItem(THEME_KEY) || "dark";
+				return localStorage.getItem(THEME_KEY) || "light";
 			}
 
 			function applyTheme(theme) {

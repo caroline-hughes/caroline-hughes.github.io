@@ -50,7 +50,7 @@ body {
 	min-height: 100vh;
 	min-height: 100dvh;
 	margin: 0;
-	padding: 24px 0 32px;
+	padding: 18px 0 24px;
 	background: radial-gradient(
 			circle at top left,
 			var(--bg-glow-strong) 0,
@@ -71,19 +71,19 @@ body {
 .page {
 	display: flex;
 	flex-direction: column;
-	width: min(1720px, calc(100% - 12px));
-	height: calc(100vh - 56px);
-	height: calc(100dvh - 56px);
+	width: min(1440px, calc(100% - 28px));
+	height: calc(100vh - 42px);
+	height: calc(100dvh - 42px);
 	margin: 0 auto;
 }
 
 .page-header {
-	width: min(1720px, calc(100% - 12px));
+	width: min(1440px, calc(100% - 28px));
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
 	gap: 24px;
-	margin-bottom: 20px;
+	margin-bottom: 14px;
 }
 
 .page-header-copy {
@@ -109,8 +109,7 @@ body {
 
 h1 {
 	margin: 0;
-	/* font-size: clamp(2.4rem, 5vw, 6rem); */
-	font-size: 4rem;
+	font-size: clamp(3rem, 3.6vw, 4rem);
 	line-height: 0.95;
 	letter-spacing: -0.06em;
 	font-weight: 600;
@@ -132,7 +131,7 @@ h1 {
 .workbench {
 	display: grid;
 	flex: 1 1 auto;
-	grid-template-columns: 350px minmax(0, 1fr);
+	grid-template-columns: 310px minmax(0, 1fr);
 	min-height: 0;
 	border: 1px solid var(--chrome-strong);
 	border-radius: 24px;
@@ -349,11 +348,11 @@ h1 {
 }
 
 .markdown-view {
-	width: min(100%, clamp(1040px, 82vw, 1360px));
+	width: min(100%, clamp(900px, 74vw, 1120px));
 	max-width: none;
 	margin: 0 auto;
-	padding: clamp(28px, 2.4vw, 40px) clamp(28px, 3vw, 56px)
-		clamp(40px, 4vw, 56px);
+	padding: clamp(24px, 2vw, 34px) clamp(24px, 2.2vw, 42px)
+		clamp(32px, 3vw, 44px);
 }
 
 .markdown-view > * + * {
@@ -803,13 +802,13 @@ h1 {
 	flex-direction: column;
 	align-items: center;
 	gap: 12px;
-	width: clamp(280px, 24vw, 360px);
-	margin: 0 0 12px clamp(24px, 2.4vw, 48px);
+	width: clamp(220px, 19vw, 300px);
+	margin: 0 0 12px clamp(20px, 2vw, 36px);
 }
 
 .markdown-view .resume-hero-photo {
 	display: block;
-	width: clamp(220px, 18vw, 280px);
+	width: clamp(180px, 15vw, 235px);
 	max-width: 100%;
 	height: auto;
 	border: 1px solid color-mix(in srgb, var(--chrome-strong) 86%, #fff 14%);
@@ -820,7 +819,7 @@ h1 {
 .markdown-view .resume-hero-links {
 	margin: 0;
 	width: 100%;
-	font-size: 0.98rem;
+	font-size: 0.92rem;
 	white-space: nowrap;
 	text-align: center;
 }
