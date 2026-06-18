@@ -26,7 +26,7 @@
 
 I’m a software engineer focused on backend systems, cloud infrastructure, and applied AI.
 
-From 2023–2026 I worked at [Oracle Health & AI](#/projects/oracle/readme.md), where I helped build cloud-native healthcare platforms spanning APIs, infrastructure provisioning, CI/CD tooling, and agentic systems. I enjoy working across the stack, though I naturally gravitate toward backend architecture, infrastructure, and systems design.
+From 2023–2026 I worked at [Oracle Health & AI](#/projects/oracle/README.md), where I helped build cloud-native healthcare platforms spanning APIs, infrastructure provisioning, CI/CD tooling, and agentic systems. I enjoy working across the stack, though I naturally gravitate toward backend architecture, infrastructure, and systems design.
 
 This fall, I’ll begin an MS in Artificial Intelligence at Columbia University. Currently, I’m spending time building personal projects and exploring modern AI systems — especially at the intersection of software engineering, retrieval, agents, and real-world deployment.
 
